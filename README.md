@@ -14,15 +14,16 @@
 As this system contains custom hardware and software I decided to split up into other files for ease of reading with the links below:
 
 
-#Table of Contents 
- * Skills Utilized 
- * Hardware Design
- * Software Design
- * Known Issues
- * Conclusion
- * Acknowledgements
+# Table of Contents
+* [Skills Utilized](#Skills-Utilized)
+* [System Diagram](#System-Diagram)
+* [Hardware Design](#Hardware-Design)
+* [Software Design](#Software-Design)
+* [Known Issues](#Known-Issues)
+* [Conclusion](#Conclusion)
+* [Acknowledgements](#Acknowledgements)
 
-#Skills Utilized
+# Skills Utilized
 Hardware:
 * KiCAD
 * Amplifier and filter design
@@ -35,11 +36,15 @@ Software:
 * FreeRTOS
 * HAL / Device Drivers
 
-#Hardware Deisgn
+# System Diagram
 
-#Software Design
+# Hardware Deisgn
 
-#Known Issues
+# Software Design
 
-#Acknowledgements
+# Known Issues
+
+# Conclusion
+
+# Acknowledgements
 * 
