@@ -81,3 +81,5 @@ Finally the system was integrated together and each part was combined in a singl
 # Roadbumps
 
 # Conclusion / Future Design Changes
+
+PCM1740E/2K appears to be much better but would cost me nearly 500x time amount of the other option
