@@ -27,22 +27,70 @@ As this system contains custom hardware and software I decided to split up into 
 Hardware:
 * KiCAD
 * Amplifier and filter design
-* Mixed Signal circuit design
+* Mixed signal circuit design
+* Power system design
 * 4-Layer-PCB
 
 Software:
-* Digital Signal Processing
+* Digital Signal Processing (DSP)
 * C++
 * FreeRTOS
+* I2S
 * HAL / Device Drivers
 
 # System Diagram
 
 # Hardware Deisgn
 
+1. **Amplify Analog Audio Signal**:  
+   The analog audio signal is first amplified to the desired level of **3 V peak-to-peak (Vp-p)**.
+
+2. **Digitize Signal (ADC)**:  
+   The amplified analog signal is converted into a digital format using an **Analog-to-Digital Converter (ADC)** for further processing.
+
+3. **Process Signal (STM32F44RE)**:  
+   The digitized signal is processed using the **STM32F44RE microcontroller**, which performs necessary filtering, manipulation, and any other DSP tasks.
+
+4. **Convert Signal to Analog (DAC)**:  
+   After processing, the signal is converted back to an analog signal using a **Digital-to-Analog Converter (DAC)**.
+
+5. **Output Signal**:  
+   The final analog output is sent through either a **3.5mm headphone jack** or a **1/4" amplifier jack** for listening or further amplification.
+
+---
+
+## Power System Overview
+
+- **Battery**:  
+  The system is powered by a **7.4V Li-Po battery**, featuring a **battery management system (BMS)** for safe operation. The system also supports **USB-C recharging**.
+
+- **Voltage Regulation**:  
+  - A **buck converter** is used to step down the battery voltage to a stable **3.3V output** for the microcontroller and other low-voltage components.
+  - A **charge pump** generates the required **5V** and **-5V outputs** for components that require dual polarity voltage (e.g., certain op-amps or other analog circuits).
+
+---
+
+## Battery Life  
+Battery life depends on the active filters being used. It can range between **X hours to Y hours**, depending on the power consumption of the system and the complexity of the signal processing.
+
+---
+
+## Additional Information  
+For more detailed development documentation, refer to the full hardware design specification in the linked document:  
+[**Hardware Design Documentation**](/Documentation/Hardware-Design.md)
+
 # Software Design
+The high level signal flow for hardware consists as follows.
+
+1. Amplify analog audio signal to desired level (3Vp-p)
+2. Digitize Signal (ADC)
+3. Process Signal (STM32F44RE)
+4. Convert signal to analog (DAC)
+5. Output signal through either 3mm headphone jack or 1/4" amp jack
+
 
 # Known Issues
+* 
 
 # Conclusion
 
