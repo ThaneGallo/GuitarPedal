@@ -48,5 +48,36 @@ The current network contains the following:
 #### Where does the power go?
 
 # Development 
+My plan was to develop each sub-circuit one at a time then integrate. This led to the development of the following sub circuits in this order:
+
+* Op-amp
+* ADC breakout board
+* DAC breakout board
+* Battery charger / power management system
+
+The decision to make breakout boards was made so I would theoretically be able to modularize these components and possibly use them for future projects while also testing the efectiveness of the PCBA design. This did however slow down development as each breakout took approximetely 1 week to fabricate.
+
+My op-amp was designed first as it was the simplest part and could quickly be adjusted as the chip chosen has a dip package as well as a smd package so I would be able to prototype on a breadboard. 
+
+Now that the signal would be within the desired voltage range I began to design the ADC circuit of which I decided to include an anti-aliasing passive filter outside of the layout for the inputs in addition to the reccomended layout just to clean the signal a bit more. This was put together into a breakout board and the layout can be seen below.
+
+LAYOUT 
+
+As the only high speed signals that needed to be synched on the chip were the lines for the I2S protocol--SCK, SD, and WS--careful consideration was made to keep the trace length as similar as possible to prevent desync issues.
+
+This was tested with a development board MCU so that it was verifed the signals recieved were the correct values and as I do not have a network analyzer either I did this using a large buffer of samples in which I played the freqency of a known note(A4-->440Hz) which then I took the FFT of to see that the frequency response was as expected.
+
+Once this was completed I began the breakout board for the DAC which proceeded similarly to the ADC (Layout can be seen below). Verification of this was done by just passing the signals from the ADC to the DAC and outputting it into a 3mm headphone jack to see if it was the correct note.
+
+LAYOUT
+
+The battery charger was able to be done simultaneously as I could purchase the desired battery, discharge it with a resistor and set up the battery balancer and charging system.
+
+The MCU was not be added to the PCB until the very last step as I have the ability to use a development board for my MCU and want to avoid any possible hiccups until later in development
+
+Finally the system was integrated together and each part was combined in a single PCBA and can be seen below:
+
+
 # Roadbumps
+
 # Conclusion / Future Design Changes
