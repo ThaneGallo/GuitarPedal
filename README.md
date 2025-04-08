@@ -68,16 +68,10 @@ Software:
   - A **buck converter** is used to step down the battery voltage to a stable **3.3V output** for the microcontroller and other low-voltage components.
   - A **charge pump** generates the required **5V** and **-5V outputs** for components that require dual polarity voltage (e.g., certain op-amps or other analog circuits).
 
----
-
-## Battery Life  
 Battery life depends on the active filters being used. It can range between **X hours to Y hours**, depending on the power consumption of the system and the complexity of the signal processing.
 
----
-
-## Additional Information  
 For more detailed development documentation, refer to the full hardware design specification in the linked document:  
-[**Hardware Design Documentation**](/Documentation/Hardware-Design.md)
+[**Hardware Design Documentation**](/Documentation/Hardware Design.md)
 
 # Software Design
 The high level signal flow for hardware consists as follows.
