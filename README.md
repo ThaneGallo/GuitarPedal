@@ -33,7 +33,7 @@ Hardware:
 
 Software:
 * Digital Signal Processing (DSP)
-* C++
+* C++/C
 * FreeRTOS
 * I2S
 * HAL / Device Drivers
