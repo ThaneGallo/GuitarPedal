@@ -1,0 +1,7 @@
+../Core/Src/PCM1802.c:13:7:toggle_PCM1802	16	static
+../Core/Src/PCM1802.c:38:7:HPF_bypass_ctrl	16	static
+../Core/Src/PCM1802.c:63:7:oversampling_ctrl	16	static
+../Core/Src/PCM1802.c:82:7:setup_PCM1802	16	static
+../Core/Src/PCM1802.c:89:7:read_PCM1802	4	static
+../Core/Src/PCM1802.c:95:7:HAL_ADC_ConvHalfCpltCallback	16	static
+../Core/Src/PCM1802.c:103:7:HAL_ADC_ConvCpltCallback	16	static
