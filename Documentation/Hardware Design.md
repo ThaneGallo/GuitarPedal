@@ -44,7 +44,6 @@ The current network contains the following:
 
 #### Charging Circuit 
 
-
 #### Where does the power go?
 
 # Development 
@@ -61,7 +60,7 @@ My op-amp was designed first as it was the simplest part and could quickly be ad
 
 Now that the signal would be within the desired voltage range I began to design the ADC circuit of which I decided to include an anti-aliasing passive filter outside of the layout for the inputs in addition to the reccomended layout just to clean the signal a bit more. This was put together into a breakout board and the layout can be seen below.
 
-LAYOUT 
+![Amp Layout](../Documentation/Images/Amp_Layout.png)
 
 As the only high speed signals that needed to be synched on the chip were the lines for the I2S protocol--SCK, SD, and WS--careful consideration was made to keep the trace length as similar as possible to prevent desync issues.
 
@@ -69,7 +68,7 @@ This was tested with a development board MCU so that it was verifed the signals 
 
 Once this was completed I began the breakout board for the DAC which proceeded similarly to the ADC (Layout can be seen below). Verification of this was done by just passing the signals from the ADC to the DAC and outputting it into a 3mm headphone jack to see if it was the correct note.
 
-LAYOUT
+![DAC Layout](../Documentation/Images/DAC_Layout.png)
 
 The battery charger was able to be done simultaneously as I could purchase the desired battery, discharge it with a resistor and set up the battery balancer and charging system.
 
