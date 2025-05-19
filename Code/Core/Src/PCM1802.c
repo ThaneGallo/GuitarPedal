@@ -1,10 +1,7 @@
 #include "PCM1802.h"
 
-#define ADC_BUF_LEN 2048
-extern uint16_t adc_buf[ADC_BUF_LEN];
-extern uint16_t tx_buf[ADC_BUF_LEN/2];
-extern uint8_t send_first_half;
-extern uint8_t send_second_half;
+extern uint8_t process_first_half;
+extern uint8_t process_second_half;
 
 
 	/*
@@ -96,7 +93,7 @@ extern uint8_t send_second_half;
 	// Called when the **first half** of the DMA buffer is filled
 	void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
 	    if (hadc->Instance == ADC1) {
-	        send_first_half = 1;
+	        process_first_half = 1;
 	    }
 	}
 
@@ -104,6 +101,6 @@ extern uint8_t send_second_half;
 	void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 	    if (hadc->Instance == ADC1) {
 	        // Process the second half of the buffer
-	    	send_second_half = 1;
+	    	process_second_half = 1;
 	    }
 	}

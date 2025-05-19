@@ -25,6 +25,9 @@
 	void setup_PCM1802(uint8_t hpf, uint8_t osr);
 	void read_PCM1802();
 
+	void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc);
+	void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc);
+
 
 
 #endif /* SRC_PCM1802_H_ */

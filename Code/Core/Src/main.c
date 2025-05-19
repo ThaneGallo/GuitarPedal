@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -26,17 +25,13 @@
 #include "PCM1802.h"
 
 #define ADC_BUF_LEN 2048
-#define TX_BUF_LEN 1024
+#define HALF_BUF_LEN 1024
 
 uint16_t adc_buf[ADC_BUF_LEN];
-uint16_t tx_buf[TX_BUF_LEN];
-uint16_t rx_buf[TX_BUF_LEN];
 
 // flags
-uint8_t ADC_Ready = 0;
-uint8_t DAC_Ready = 0;
-uint8_t send_first_half = 0;
-uint8_t send_second_half = 0;
+uint8_t process_first_half = 0;
+uint8_t process_second_half = 0;
 
 /* USER CODE END Includes */
 
@@ -63,30 +58,6 @@ TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart2;
 
-/* Definitions for PCM1802_ADC */
-osThreadId_t PCM1802_ADCHandle;
-const osThreadAttr_t PCM1802_ADC_attributes = {
-  .name = "PCM1802_ADC",
-  .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for ProcessData */
-osThreadId_t ProcessDataHandle;
-const osThreadAttr_t ProcessData_attributes = {
-  .name = "ProcessData",
-  .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
-/* Definitions for ADC_Out */
-osMessageQueueId_t ADC_OutHandle;
-const osMessageQueueAttr_t ADC_Out_attributes = {
-  .name = "ADC_Out"
-};
-/* Definitions for USART_lock */
-osMutexId_t USART_lockHandle;
-const osMutexAttr_t USART_lock_attributes = {
-  .name = "USART_lock"
-};
 /* USER CODE BEGIN PV */
 
 
@@ -99,9 +70,6 @@ static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM2_Init(void);
-void Start_ADC(void *argument);
-void Start_Process_Data(void *argument);
-
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -111,9 +79,9 @@ void Start_Process_Data(void *argument);
 
 void myprintf(const char *fmt, ...) {
 
-	osStatus res = osMutexWait(USART_lockHandle, 1000);
+//	osStatus res = osMutexWait(USART_lockHandle, 1000);
 
-	if(res == osOK){
+//	if(res == osOK){
 
   static char buffer[256];
   va_list args;
@@ -126,9 +94,8 @@ void myprintf(const char *fmt, ...) {
 
 	}
 
-	osMutexRelease(USART_lockHandle);
+//	osMutexRelease(USART_lockHandle);
 
-}
 
 /* USER CODE END 0 */
 
@@ -166,53 +133,15 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  /* USER CODE END 2 */
+   uint32_t i;
 
-  /* Init scheduler */
-  osKernelInitialize();
-  /* Create the mutex(es) */
-  /* creation of USART_lock */
-  USART_lockHandle = osMutexNew(&USART_lock_attributes);
+   myprintf("Start of start adc\n");
 
-  /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
-  /* USER CODE END RTOS_MUTEX */
+   //begins filling of ADC buffer
+   HAL_TIM_Base_Start(&htim2);
+   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buf, ADC_BUF_LEN);
 
-  /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
-  /* USER CODE END RTOS_SEMAPHORES */
-
-  /* USER CODE BEGIN RTOS_TIMERS */
-  /* start timers, add new ones, ... */
-  /* USER CODE END RTOS_TIMERS */
-
-  /* Create the queue(s) */
-  /* creation of ADC_Out */
-  ADC_OutHandle = osMessageQueueNew (1024, sizeof(uint16_t), &ADC_Out_attributes);
-
-  /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
-  /* USER CODE END RTOS_QUEUES */
-
-  /* Create the thread(s) */
-  /* creation of PCM1802_ADC */
-  PCM1802_ADCHandle = osThreadNew(Start_ADC, NULL, &PCM1802_ADC_attributes);
-
-  /* creation of ProcessData */
-  ProcessDataHandle = osThreadNew(Start_Process_Data, NULL, &ProcessData_attributes);
-
-  /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
-  /* USER CODE END RTOS_THREADS */
-
-  /* USER CODE BEGIN RTOS_EVENTS */
-  /* add events, ... */
-  /* USER CODE END RTOS_EVENTS */
-
-  /* Start scheduler */
-  osKernelStart();
-
-  /* We should never get here as control is now taken by the scheduler */
+   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -222,9 +151,39 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
+	  //triggers when adc buff is half full
+	   	if(process_first_half == 1){
+	   		//print buffer for debug
+
+	   		for(i = 0; i < HALF_BUF_LEN; i++){
+	   			myprintf("FirstHalf %d:   %d\n", i, adc_buf[i]);
+
+	   		}
+
+
+
+	   		process_first_half = 0;
+	   	}
+	   	//triggers once the second half is filled
+	   	if(process_second_half == 1){
+
+	   		for(i = 0; i < HALF_BUF_LEN; i++){
+	   			myprintf("SecondHalf %d:   %d\n", i, adc_buf[i + HALF_BUF_LEN]);
+
+	   	    }
+
+
+	   		process_second_half = 0;
+	   	}
+
+
+
+	   	}
+
+
+
   }
   /* USER CODE END 3 */
-}
 
 /**
   * @brief System Clock Configuration
@@ -414,7 +373,7 @@ static void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA2_Stream0_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
 
 }
@@ -439,106 +398,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
-
-/* USER CODE BEGIN Header_Start_ADC */
-/**
-  * @brief  Function implementing the PCM1802_ADC thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_Start_ADC */
-void Start_ADC(void *argument)
-{
-  /* USER CODE BEGIN 5 */
-
-  osStatus_t status;
-  uint8_t i;
-
-  myprintf("Start of start adc\n");
-
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buf, ADC_BUF_LEN);
-  /* Infinite loop */
-  for(;;)
-  {
-
-
-	//recieves data to process
-	if(send_first_half == 1){
-
-
-	for(i = 0; i < TX_BUF_LEN; i++){
-	status = osMessageQueuePut(ADC_OutHandle, &adc_buf[i], 0, 1000);
-
-	if(status != osOK){
-		//print error message
-		myprintf("Error in OS Message : %d\n", status);
-	}
-
-	   send_first_half = 0;
-
-
-	}
-
-	if(send_second_half == 1){
-
-		for(i = 0; i < TX_BUF_LEN; i++){
-		status = osMessageQueuePut(ADC_OutHandle, &adc_buf[i + TX_BUF_LEN], 0, 1000);
-
-		if(status != osOK){
-			//print error message
-			myprintf("Error in OS Message : %d\n", status);
-		}
-
-		send_second_half = 0;
-	}
-
-
-	//processes data
-
-	//sends to DAC
-
-	}
-		//complete tx buffer send
-
-	}
-
-    osDelay(10);
-  }
-  /* USER CODE END 5 */
-}
-
-/* USER CODE BEGIN Header_Start_Process_Data */
-/**
-* @brief Function implementing the ProcessData thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_Start_Process_Data */
-void Start_Process_Data(void *argument)
-{
-  /* USER CODE BEGIN Start_Process_Data */
-	 osStatus_t status;
-	 uint8_t i;
-
-	 myprintf("Start of process data\n");
-  /* Infinite loop */
-  for(;;)
-  {
-		for(i = 0; i < TX_BUF_LEN; i++){
-		status = osMessageQueueGet(ADC_OutHandle, &rx_buf[i], 0, osWaitForever);
-
-		if(status != 0){
-			myprintf("Error in OS Message get: %d\n", status);
-		}
-
-    osDelay(10000);
-
-  }
-
-  }
-
-  /* USER CODE END Start_Process_Data */
-}
 
 /**
   * @brief  Period elapsed callback in non blocking mode
