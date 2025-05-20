@@ -8,6 +8,7 @@
 #ifndef SRC_WM8524_H_
 #define SRC_WM8524_H_
 
+#include "stdint.h"
 
 
 #define MUTE_PIN 0

@@ -24,10 +24,11 @@
 
 #include "PCM1802.h"
 
-#define ADC_BUF_LEN 2048
-#define HALF_BUF_LEN 1024
+#define ADC_BUF_LEN 8192
+#define HALF_BUF_LEN 4096
 
 uint16_t adc_buf[ADC_BUF_LEN];
+uint16_t dac_buf[ADC_BUF_LEN];
 
 // flags
 uint8_t process_first_half = 0;
@@ -54,6 +55,9 @@ uint8_t process_second_half = 0;
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
+DAC_HandleTypeDef hdac;
+DMA_HandleTypeDef hdma_dac1;
+
 TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart2;
@@ -70,6 +74,7 @@ static void MX_DMA_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_DAC_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -132,8 +137,10 @@ int main(void)
   MX_ADC1_Init();
   MX_USART2_UART_Init();
   MX_TIM2_Init();
+  MX_DAC_Init();
   /* USER CODE BEGIN 2 */
-   uint32_t i;
+//   uint32_t i;
+   uint8_t dac = 0;
 
    myprintf("Start of start adc\n");
 
@@ -141,7 +148,7 @@ int main(void)
    HAL_TIM_Base_Start(&htim2);
    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adc_buf, ADC_BUF_LEN);
 
-   /* USER CODE END 2 */
+  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -153,13 +160,17 @@ int main(void)
 
 	  //triggers when adc buff is half full
 	   	if(process_first_half == 1){
-	   		//print buffer for debug
 
-	   		for(i = 0; i < HALF_BUF_LEN; i++){
-	   			myprintf("FirstHalf %d:   %d\n", i, adc_buf[i]);
 
+	   		//process data
+
+	   		//copies processed data into dac
+	   		memcpy(dac_buf, adc_buf, (ADC_BUF_LEN * sizeof(uint16_t)) / 2);
+
+	   		if(dac == 0){
+	   		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*)dac_buf, ADC_BUF_LEN, DAC_ALIGN_12B_R);
+	   		dac = 1;
 	   		}
-
 
 
 	   		process_first_half = 0;
@@ -167,11 +178,12 @@ int main(void)
 	   	//triggers once the second half is filled
 	   	if(process_second_half == 1){
 
-	   		for(i = 0; i < HALF_BUF_LEN; i++){
-	   			myprintf("SecondHalf %d:   %d\n", i, adc_buf[i + HALF_BUF_LEN]);
+//	   		for(i = 0; i < HALF_BUF_LEN; i++){
+//	   			myprintf("SecondHalf %d:   %d\n", i, adc_buf[i + HALF_BUF_LEN]);
+//
+//	   	    }
 
-	   	    }
-
+	   		memcpy(&dac_buf[ADC_BUF_LEN/2], &adc_buf[ADC_BUF_LEN/2], (ADC_BUF_LEN * sizeof(uint16_t)) / 2);
 
 	   		process_second_half = 0;
 	   	}
@@ -180,10 +192,8 @@ int main(void)
 
 	   	}
 
-
-
-  }
   /* USER CODE END 3 */
+}
 
 /**
   * @brief System Clock Configuration
@@ -285,6 +295,46 @@ static void MX_ADC1_Init(void)
 }
 
 /**
+  * @brief DAC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_DAC_Init(void)
+{
+
+  /* USER CODE BEGIN DAC_Init 0 */
+
+  /* USER CODE END DAC_Init 0 */
+
+  DAC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN DAC_Init 1 */
+
+  /* USER CODE END DAC_Init 1 */
+
+  /** DAC Initialization
+  */
+  hdac.Instance = DAC;
+  if (HAL_DAC_Init(&hdac) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** DAC channel OUT1 config
+  */
+  sConfig.DAC_Trigger = DAC_TRIGGER_T2_TRGO;
+  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+  if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN DAC_Init 2 */
+
+  /* USER CODE END DAC_Init 2 */
+
+}
+
+/**
   * @brief TIM2 Initialization Function
   * @param None
   * @retval None
@@ -370,8 +420,12 @@ static void MX_DMA_Init(void)
 
   /* DMA controller clock enable */
   __HAL_RCC_DMA2_CLK_ENABLE();
+  __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* DMA interrupt init */
+  /* DMA1_Stream5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
   /* DMA2_Stream0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
