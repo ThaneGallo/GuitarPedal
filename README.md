@@ -57,7 +57,7 @@ Software:
 5. **Output Signal**:  
    The final analog output is sent through either a **3.5mm headphone jack** or a **1/4" amplifier jack** for listening or further amplification.
 
-More in depth information can be found [here](Documentation/Hardware Design.md)
+More in depth information can be found [here](Documentation/Hardware%Design.md)
 
 ---
 
@@ -84,7 +84,7 @@ The high level signal flow for software consists as follows.
 4. Convert signal to analog (DAC)
 5. Output signal through either 3mm headphone jack or 1/4" amp jack
 
-More in depth information can be found [here](Documentation/Software Design.md)
+More in depth information can be found [here](Documentation/Software%Design.md)
 
 
 # Known Issues
