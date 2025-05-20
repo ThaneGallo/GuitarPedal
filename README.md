@@ -40,6 +40,8 @@ Software:
 
 # System Diagram
 
+[System Diagram](Documentation/Images/System_Diagram_Guitar_Pedal.png)
+
 # Hardware Deisgn
 
 1. **Amplify Analog Audio Signal**:  
