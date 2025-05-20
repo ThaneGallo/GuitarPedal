@@ -40,7 +40,8 @@ Software:
 
 # System Diagram
 
-[System Diagram](Documentation/Images/System_Diagram_Guitar_Pedal.png)
+
+![System Diagram](Documentation/Images/System_Diagram_Guitar_Pedal.png "System Diagram")
 
 # Hardware Deisgn
 
