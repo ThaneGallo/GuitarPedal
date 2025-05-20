@@ -57,6 +57,8 @@ Software:
 5. **Output Signal**:  
    The final analog output is sent through either a **3.5mm headphone jack** or a **1/4" amplifier jack** for listening or further amplification.
 
+More in depth information can be found [here](Documentation/Hardware Design.md)
+
 ---
 
 ## Power System Overview
@@ -74,7 +76,7 @@ For more detailed development documentation, refer to the full hardware design s
 [**Hardware Design Documentation**](/Documentation/Hardware Design.md)
 
 # Software Design
-The high level signal flow for hardware consists as follows.
+The high level signal flow for software consists as follows.
 
 1. Amplify analog audio signal to desired level (3Vp-p)
 2. Digitize Signal (ADC)
@@ -82,9 +84,11 @@ The high level signal flow for hardware consists as follows.
 4. Convert signal to analog (DAC)
 5. Output signal through either 3mm headphone jack or 1/4" amp jack
 
+More in depth information can be found [here](Documentation/Software Design.md)
+
 
 # Known Issues
-* 
+* The filter is not perfectly centered around the 1.5 v value with perfect size to fit the whole adc sampling range there is a calibration feature to be added which would give feedback and tell you to adjust the volume potentiometer on the input guitar.
 
 # Conclusion
 
