@@ -22,6 +22,8 @@
  */
 
 
+
+// filters 
  enum filter_type
  {
      LOW_PASS_FILTER,
@@ -53,7 +55,7 @@ struct second_order_coeff
     float xn_1;
     float xn_2;
     float yn_1;
-    float yn_2
+    float yn_2;
 };
 
 
@@ -73,6 +75,15 @@ struct second_order_coeff
 }filter; 
 
 
+//delay
+typedef struct delay {
+   float ms;
+   float** delay_buf;
+   uint8_t num_buf;
+   uint8_t filled_all;
+   uint8_t index;
+
+}delay;
 
 
 
@@ -86,21 +97,30 @@ struct second_order_coeff
 
 // fft functions
 complex float twiddle_factor(int k, int N, int8_t sign);
-complex float *turn_to_imag(float *data, uint8_t size);
-complex float *fft(complex float *data, uint8_t size);
-complex float *inverse_fft(complex float *data, uint8_t size);
+complex float *turn_to_imag(float *data, uint16_t size);
+complex float *fft(complex float *data, uint16_t size);
+complex float *inverse_fft(complex float *data, uint16_t size);
 
-void create_filter(filter *filter, enum filter_type type, uint8_t order, float Q, float freq);
 
-// filters in freq domain
-void low_pass_filter_freq(complex float *data, filter *filter, uint8_t size);
-void high_pass_filter_freq(complex float *data, filter *filter, uint8_t size);
-void band_pass_filter_freq(complex float *data, filter *filter, uint8_t size);
-void band_stop_filter_freq(complex float *data, filter *filter, uint8_t size);
-// void resonance_filter_freq(complex float *data, uint8_t size);
+//filter functions
+void create_filter(filter *filter, enum filter_type type, uint8_t order, float Q, float cutoff);
+void filter_data_iir(float* data, filter *filter, uint16_t size);
+void low_pass_filter_freq(complex float *data, filter *filter, uint16_t size);
+void high_pass_filter_freq(complex float *data, filter *filter, uint16_t size);
+void band_pass_filter_freq(complex float *data, filter *filter, uint16_t size);
+void band_stop_filter_freq(complex float *data, filter *filter, uint16_t size);
 
-// filter in time domain
-void filter_data_iir(float *data, filter *filter, uint8_t size);
+
+//delay functions
+void create_delay(delay *delay, float delay_ms);
+void process_delay(float* new_data, delay *delay, float attenuation);
+
+
+//distortion/overdrive
+void hard_clip(float* data, float amplitude, uint16_t size);
+void soft_clip(float* data, float drive, uint16_t size);
+
+
 
 // other pedals to be implimented
 /*
@@ -113,17 +133,17 @@ equilizer
 */
 
 // misc utilities
-float find_peak_to_peak(complex float *data, uint8_t size);
-float find_fundamental_freq(complex float *data, uint8_t size);
-
-void clip_signal(complex float *data, float upper_clip_limit, float lower_clip_limit, uint8_t size);
+float find_average(uint16_t* data, uint16_t size);
+void combine_buffers(float* out_buf, float* in_buf, float attenuation, uint16_t size);
 
 // ============================================================
 //                       Constants & Macros
 // ============================================================
 
-#define DSP_MAX_BUFFER_SIZE 4096
-#define SAMPLE_RATE 96000
 #define IDEAL_FILTER -1
+#define SAMPLE_RATE 96000
+#define TIME_FOR_ONE_SAMPLE_MS .01
+#define ADC_BUF_LEN 8192
+#define HALF_BUF_LEN 4096
 
 #endif // DSP_H

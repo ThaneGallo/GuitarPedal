@@ -25,14 +25,16 @@
 #include "PCM1802.h"
 #include "dsp.h"
 
-#define ADC_BUF_LEN 8192
-#define HALF_BUF_LEN 4096
+
 
 // #define ADC_BUF_LEN 16384
 // #define HALF_BUF_LEN 8192
 
-uint16_t adc_buf[ADC_BUF_LEN];
-uint16_t dac_buf[ADC_BUF_LEN];
+static uint16_t adc_buf[ADC_BUF_LEN];
+static uint16_t dac_buf[ADC_BUF_LEN];
+
+static float processing_buf[HALF_BUF_LEN];
+
 
 // flags
 uint8_t process_first_half = 0;
@@ -150,12 +152,17 @@ int main(void)
   HAL_TIM_Base_Start(&htim2);
   HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buf, ADC_BUF_LEN);
 
-  filter *lowpass_test = malloc(sizeof(filter));
-  filter *highpass_test = malloc(sizeof(filter));
-  filter *bandpass_test = malloc(sizeof(filter));
-  create_filter(lowpass_test, LOW_PASS_FILTER, 2, 1, 80);
-  create_filter(highpass_test, HIGH_PASS_FILTER, -1, 5, 60);
-  create_filter(bandpass_test, BAND_PASS_FILTER, 2, .7, 60);
+//  filter *lowpass_test = malloc(sizeof(filter));
+//  filter *highpass_test = malloc(sizeof(filter));
+//  filter *bandstop_test = malloc(sizeof(filter));
+//  create_filter(lowpass_test, LOW_PASS_FILTER, 2, 1, 80);
+////  create_filter(highpass_test, HIGH_PASS_FILTER, 2, 1, 200);
+//  create_filter(bandstop_test, BAND_STOP_FILTER, 2, .7, 60);
+
+  delay* delay;
+  delay = malloc(sizeof(delay));
+  create_delay(delay, 50);
+
 
   /* USER CODE END 2 */
 
@@ -179,10 +186,18 @@ int main(void)
     if (process_first_half == 1)
     {
 
-      filter_data_iir(adc_buf, bandpass_test, HALF_BUF_LEN);
+    //prepare data for dsp
 
-      // copies processed data into dac
-      memcpy(dac_buf, adc_buf, (ADC_BUF_LEN * sizeof(uint16_t)) / 2);
+      normalize_adc(processing_buf, adc_buf, HALF_BUF_LEN); //shift from 0-->4096 to -1 to 1
+
+
+      process_delay(processing_buf, delay, .5);
+
+
+      prepare_for_dac(&dac_buf, processing_buf, HALF_BUF_LEN);
+//
+//      //copy data into dac buffer
+//      memcpy(&dac_buf, processing_buf, HALF_BUF_LEN * sizeof(uint16_t));
 
       process_first_half = 0;
     }
@@ -190,11 +205,17 @@ int main(void)
     if (process_second_half == 1)
     {
 
-      filter_data_iir(&adc_buf[HALF_BUF_LEN], bandpass_test, HALF_BUF_LEN);
+//      dc_block(&adc_buf[HALF_BUF_LEN], HALF_BUF_LEN);
+      normalize_adc(processing_buf, &adc_buf[HALF_BUF_LEN], HALF_BUF_LEN); //shift to -1 --> 1
+//
 
-      //
-      //	   		//fill second half of buffer
-      memcpy(&dac_buf[ADC_BUF_LEN / 2], &adc_buf[ADC_BUF_LEN / 2], (ADC_BUF_LEN * sizeof(uint16_t)) / 2);
+      process_delay(processing_buf, delay, .5);
+
+      //shifts back to
+      prepare_for_dac(&dac_buf[HALF_BUF_LEN], processing_buf, HALF_BUF_LEN);
+
+//      //copy data into dac buffer
+//      memcpy(&dac_buf[HALF_BUF_LEN], processing_buf, HALF_BUF_LEN * sizeof(uint16_t));
 
       if (dac == 0)
       {

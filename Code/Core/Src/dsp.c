@@ -1,99 +1,149 @@
 #include "dsp.h"
 
-/**
- * @brief returns approximate peak to peak voltage for time domain signal
- * @param data pointer to transformed signal freq response (post fft)
- * @param size size of signal array
- */
-float find_peak_to_peak(complex float *data, uint8_t size)
-{
-    uint8_t i;
 
-    // temp storage for min and max
-    float min = 0;
-    float max = 0;
+void combine_buffers(float* out_buf, float* in_buf, float attenuation, uint16_t size){
 
-    // use magnitude? or real value
-    for (i = 0; i < size; i++)
-    {
-        data[i];
-    }
+    uint16_t i;
+    float max_value = 0; // for normalizing
 
-    return max - min;
-}
+    //check for null
+    if (!out_buf) {
+         myprintf("combine_buffers ERROR: out_buf is NULL\n");
+         return;
+     }
 
-/**
- * @brief clips time domain signal
- * @param data pointer to transformed signal freq response (post fft)
- * @param upper_clip_limit where clipping occurs on + side
- * @param lower_clip_limit where clipping occurs on - side
- * @param size size of signal array
- */
-void clip_signal(complex float *data, float upper_clip_limit, float lower_clip_limit, uint8_t size)
-{
-    uint8_t i;
+     if (!in_buf) {
+         myprintf("combine_buffers ERROR: in_buf is NULL\n");
+         return;
+     }
 
-    // use magnitude? or real value
-    for (i = 0; i < size; i++)
-    {
+     if (size == 0) {
+         myprintf("combine_buffers WARNING: size is 0\n");
+         return;
+     }
 
-        if (cabs(data[i]) > upper_clip_limit)
-        {
-            data[i] = upper_clip_limit;
+    //combines buffers and searches for max to renormalize later
+    for(i = 0; i < size; i++){
+
+    	myprintf("combine_buffers(): size=%d\n", size);
+    	myprintf("out_buf=%p, in_buf=%p\n", out_buf, in_buf);
+    	myprintf("out_buf=%d, in_buf=%d\n", out_buf[i], in_buf[i]);
+
+        out_buf[i] =  attenuation * in_buf[i] + out_buf[i];
+
+
+        if(out_buf[i] > max_value){
+            max_value = out_buf[i];
         }
 
-        if (cabs(data[i]) < lower_clip_limit)
-        {
-            data[i] = lower_clip_limit;
-        }
-    }
-};
-
-/**
- * @brief finds f0 frequency for finding harmonics later
- * @param data pointer to transformed signal freq response (post fft)
- * @param size size of signal array
- */
-float find_fundamental_freq(complex float *data, uint8_t size)
-{
-
-    float fund_freq = 0;
-    uint8_t i;
-
-    for (i = 0; i < size; i++)
-    {
-        float freq_bin = ((float)i * SAMPLE_RATE) / size;
-
-        if (cabsf(data[i]) > fund_freq)
-        {
-            fund_freq = freq_bin;
-        }
     }
 
-    return fund_freq;
+    //re-normalizes from -1 --> 1
+     for(i = 0; i < size; i++){
+
+        out_buf[i] /= max_value;
+
+    }
+
+
 }
 
-/**
- * @brief turns float into complex  float for fft
- * @param data pointer to real signal
- * @param size size of signal array
- */
-complex float *turn_to_imag(float *data, uint8_t size)
-{
+void create_delay(delay *delay, float delay_ms){
 
-    int i = 0;
-    complex float *return_data = malloc(sizeof(complex float) * size);
+	uint8_t i;
 
-    for (i = 0; i < size; i++)
-    {
+	myprintf("in_create_delay \n");
 
-        return_data[i] = data[i] + 0.0 * I;
-    }
 
-    free(data);
 
-    return return_data;
+	uint8_t num_buf = (uint8_t)(delay_ms / (TIME_FOR_ONE_SAMPLE_MS * HALF_BUF_LEN));
+
+	if (num_buf < 1) {
+	    myprintf("Delay is too short");
+	    return;
+	}
+
+	// Allocate array of float* (buffer pointers)
+	delay->delay_buf = malloc(sizeof(float*) * num_buf);
+	if (!delay->delay_buf) {
+	    myprintf("Not enough space for delay buffer pointers");
+	    return;
+	}
+
+	// Allocate each individual float buffer
+	for (i = 0; i < num_buf; i++) {
+
+	    delay->delay_buf[i] = malloc(sizeof(float) * HALF_BUF_LEN);
+	    myprintf("delay_buf[%d] = %p\n", i, delay->delay_buf[i]);
+
+	    if (!delay->delay_buf[i]) {
+	        myprintf("Not enough space for buffer %d\n", i);
+
+	        // Free previously allocated buffers
+	        for (int j = 0; j < i; j++) {
+	            free(delay->delay_buf[j]);
+	        }
+	        free(delay->delay_buf);
+	        return;
+	    }
+
+	}
+
+
+	delay->num_buf = num_buf;
+	delay->ms = delay_ms;
+	delay->index = 0;
+	delay->filled_all = 0;
+
 }
+
+
+void process_delay(float* new_data, delay *delay, float attenuation){
+
+	if(delay->filled_all == 1){
+		//combine old data with new
+		combine_buffers(new_data, delay->delay_buf[delay->index], attenuation, HALF_BUF_LEN);
+
+		//copy old data to buffer for next copy
+		memcpy(delay->delay_buf[delay->index], new_data, (HALF_BUF_LEN)*sizeof(float));
+
+
+		delay->index++;
+
+
+		//reset index to start from first buffer
+		if(delay->index >= delay->num_buf){
+			delay->index = 0;
+		}
+		return;
+	}
+	else{
+	memcpy(delay->delay_buf[delay->index], new_data, (HALF_BUF_LEN)*sizeof(float));
+
+	delay->index++;
+
+	if(delay->index >= delay->num_buf){
+			delay->index = 0;
+			delay->filled_all = 1;
+	}
+	return;
+	}
+
+
+}
+
+
+
+void soft_clip(float *data, float drive, uint16_t size){
+//as drive goes up it increases cutoff
+
+
+
+
+
+}
+
+
 
 /**
  * @brief computes filter coefficients for easier application later
@@ -103,10 +153,10 @@ complex float *turn_to_imag(float *data, uint8_t size)
  * @param Q q-factor (if applicable (order > 1))
  * @param freq filter->cutoff frequency point
  */
-void create_filter(filter *filter, enum filter_type type, uint8_t order, float Q, float freq)
+void create_filter(filter *filter, enum filter_type type, uint8_t order, float Q, float cutoff)
 {
     filter->type = type;
-    filter->cutoff = freq;
+    filter->cutoff = cutoff;
     filter->Q = Q;
     
     
@@ -119,7 +169,7 @@ void create_filter(filter *filter, enum filter_type type, uint8_t order, float Q
 
     case 1:
         
-        float tau = 1.0f / (2.0f * M_PI * freq);
+        float tau = 1.0f / (2.0f * M_PI * cutoff);
 
         switch (type)
         {
@@ -147,7 +197,7 @@ void create_filter(filter *filter, enum filter_type type, uint8_t order, float Q
     	//if Q >= .707 it resonates
     	 switch (type)
     	        {
-    	 	 float omega = 2 * M_PI * freq / SAMPLE_RATE;
+    	 	 float omega = 2 * M_PI * cutoff / SAMPLE_RATE;
     		 float alpha = sinf(omega) / (2.0f * Q);
     		 float cos_omega = cosf(omega);
     		 float a0 = 1 + alpha;
@@ -191,7 +241,7 @@ void create_filter(filter *filter, enum filter_type type, uint8_t order, float Q
     	        }
 
 
-        float omega = (2 * M_PI * freq) / SAMPLE_RATE;
+        float omega = (2 * M_PI * cutoff) / SAMPLE_RATE;
         float alpha = sinf(omega) / (2 * Q);
         float cos_omega = cosf(omega);
 
@@ -212,9 +262,9 @@ void create_filter(filter *filter, enum filter_type type, uint8_t order, float Q
  * @param filter filter to be used
  * @param size size of signal array
  */
-void filter_data_iir(float *data, filter *filter, uint8_t size){
+void filter_data_iir(float *data, filter *filter, uint16_t size){
 
-	  uint8_t i = 0;
+	  uint16_t i = 0;
 
 
 
@@ -224,7 +274,7 @@ void filter_data_iir(float *data, filter *filter, uint8_t size){
 
 		    	float previous_value = data[0];
 
-		        for (i = 1; i < size; i++)
+		        for (i = 0; i < size; i++)
 		        {
 
 		            data[i] = filter->coeff.first_order.a0 * data[i]
@@ -280,7 +330,7 @@ void filter_data_iir(float *data, filter *filter, uint8_t size){
   * @param rolloff desired rate of rolloff (-1 for ideal)
   * @param size size of signal array
   */
- void low_pass_filter_freq(complex float *data, filter *filter, uint8_t size)
+ void low_pass_filter_freq(complex float *data, filter *filter, uint16_t size)
  {
      uint8_t i = 0;
 
@@ -320,7 +370,7 @@ void filter_data_iir(float *data, filter *filter, uint8_t size){
   * @param rolloff desired rate of rolloff (-1 for ideal)
   * @param size size of signal array
   */
- void high_pass_filter_freq(complex float *data, filter *filter, uint8_t size)
+ void high_pass_filter_freq(complex float *data, filter *filter, uint16_t size)
  {
      uint8_t i = 0;
      float magnitude_db;
@@ -362,7 +412,7 @@ void filter_data_iir(float *data, filter *filter, uint8_t size){
   * @param lpf_rolloff desired rate of lower rolloff (-1 for ideal)
   * @param size size of signal array
   */
- void band_pass_filter_freq(complex float *data, filter *filter, uint8_t size)
+ void band_pass_filter_freq(complex float *data, filter *filter, uint16_t size)
  {
      // does not need any special ordering like bsp bc the filters do not interact with one another
      high_pass_filter_freq(data, filter, size);
@@ -378,7 +428,7 @@ void filter_data_iir(float *data, filter *filter, uint8_t size){
   * @param lpf_rolloff desired rate of higher rolloff (-1 for ideal)
   * @param size size of signal array
   */
- void band_stop_filter_freq(complex float *data, filter *filter, uint8_t size)
+ void band_stop_filter_freq(complex float *data, filter *filter, uint16_t size)
  {
      uint8_t i;
 
@@ -428,7 +478,7 @@ complex float twiddle_factor(int k, int N, int8_t sign)
  * @param size size of data array (2^n)
  * @return pointer to transformed array
  */
-complex float *fft(complex float *data, uint8_t size)
+complex float *fft(complex float *data, uint16_t size)
 {
 
     // base case
@@ -475,7 +525,7 @@ complex float *fft(complex float *data, uint8_t size)
  * @param size size of data array (2^n)
  * @return pointer to reverted array
  */
-complex float *inverse_fft(complex float *data, uint8_t size)
+complex float *inverse_fft(complex float *data, uint16_t size)
 {
 
     // base case

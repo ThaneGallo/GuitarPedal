@@ -23,7 +23,7 @@
 	void oversampling_ctrl(uint8_t osr);
 
 	void setup_PCM1802(uint8_t hpf, uint8_t osr);
-	void read_PCM1802();
+	void normalize_adc(float* out_data, uint16_t* in_data, uint16_t size);
 
 	void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc);
 	void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc);

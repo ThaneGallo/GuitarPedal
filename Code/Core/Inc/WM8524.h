@@ -20,6 +20,7 @@
 	void toggle_WM8524();
 	void Aifmode_ctrl(uint8_t aifmode);
 	void send_WM8524();
+	void prepare_for_dac(uint16_t* out_data, float* in_data, uint16_t size);
 
 
 #endif /* SRC_WM8524_H_ */

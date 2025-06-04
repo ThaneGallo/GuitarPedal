@@ -25,14 +25,15 @@
 
 
 
-//other pedals to be implimented
-/*
+//pedal_init
+void delay_init(float** delay_buf, float delay_ms);
 
-clip / distortion
-equilizer
-*/
 
+
+
+//pedal
 void delay_pedal();
+void filter_pedal();
 void gain_pedal();
 void wah_pedal();
 void frog_pedal();
@@ -45,19 +46,46 @@ void overdrive_pedal();
 //                       Constants & Macros
 // ============================================================
 
-typedef struct node{
+//typedef struct node{
+//
+//    struct pedal;
+//    node* next;
+//
+//} node;
+//
+////
+////struct delay_pedal
+////{
+////    float delay_ms;
+////    float** delay_buf;
+////    uint8_t filter_index;
+////};
+//
+//
+//
+//
+//typedef struct pedal{
+//    enum pedal_type type;
+//
+//
+//    union pedals
+//    {
+//
+//        struct delay_pedal delay;
+//        filter filter;
+//
+//    };
+//
+//} pedal;
+//
 
-    uint8_t pedal;
-    node* next;
 
-} node;
-
-
-
-#define CLEAN 0x00
-#define  DELAY 0x01
-#define GAIN 0x02
-#define WAH 0x04
+enum pedal_type{
+    CLEAN,
+    FILTER,
+    DELAY,
+    WAH
+};
 
 
 #endif // PEDALS_H

@@ -4,6 +4,27 @@ extern uint8_t process_first_half;
 extern uint8_t process_second_half;
 
 
+	void normalize_adc(float* out_data, uint16_t* in_data, uint16_t size){
+		uint16_t i;
+
+		    float x_prev = 0.0f;
+		    float y_prev = 0.0f;
+
+		    for (uint16_t i = 0; i < size; i++) {
+		        // Convert from uint16_t to float centered around 0
+		        float x = ((float)in_data[i] - 2048.0f) / 2048.0f;
+
+		        // Apply DC blocker IIR filter
+		        float y = x - x_prev + 0.995 * y_prev;
+
+		        x_prev = x;
+		        y_prev = y;
+
+		        out_data[i] = y;
+		    }
+
+	}
+
 	/*
 	 * 0 = Power on
 	 * 1 = Power down
