@@ -27,16 +27,28 @@ The next implimented effect was the delay effect which would effectively add an 
 
 # How-To
 
-First a DC Block (fucntions as high pass filter) funcition is to be called to prime the data for processing moving 0-4096 to -1 to 1.
+First a DC Block (fucntions as high pass filter) funcition is to be called to prime the data for processing moving 0-MAX_ADC_VAL to -1 to 1.
 
 ## Digital Filtering
 All filters supported by the project begin with the below function:
  
-create_filter(filter *filter, enum filter_type type, uint8_t order, float Q, float cutoff)
+'''create_filter(Filter *filter, enum filter_type type, uint8_t order, float Q, float cutoff)'''
   
 This takes a pointer to the filter struct and calculates all of the coefficients necessary for the IIR based on the desired cutoff, order, and Q factor for the sharpness of the filter (above .707 starts resonance around the cutoff)
 
-Then after the filter is made you simply use filter_data_iir(float *data, filter *filter, uint8_t size) which processes the data before it gets sent to the dac_buffer for playback.
+Then after the filter is made you simply use
+
+''' filter_data_iir(float *data, filter *filter, uint8_t size) which processes the data before it gets sent to the dac_buffer for playback. '''
+
+## Delay 
+
+Creating the delay struct occurs when you use the following 
+
+''' create_delay(Delay* delay, float delay_ms); '''
+
+This just creates the delay object which contains a few sub-buffers to store and combine information as it is processed within the below function:
+
+''' process_delay(float* data, Delay* delay, float attenuation) '''
 
 
 ## Gain and Distortion
@@ -44,13 +56,13 @@ There are two main types of distortion currently supported, soft and hard clippi
 
 ### Hard Clipping : Harsh
 
-void hard_clip(float* data, float amplitude, uint16_t size);
+''' void hard_clip(float* data, float amplitude, uint16_t size); '''
 
 Clips to a set of thresholds so that all values above an upper threshold get moved down and all below the lower threshold get moves down. In the above implimentation it uses a set amplitude from the center and clips accordingly.
 
 ### Soft Clipping : Warm sounding distortion 
 
-void soft_clip(float* data, float drive, uint16_t size);
+''' void soft_clip(float* data, float drive, uint16_t size); '''
 
 Has a smoother clipping around the threshold and this specific implimentation uses tanh() to perform the clipping and uses a varible drive to change the strength of the clipping.
 
