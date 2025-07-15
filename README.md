@@ -13,7 +13,6 @@
 
 As this system contains custom hardware and software I decided to split up into other files for ease of reading with the links below:
 
-
 # Table of Contents
 * [Skills Utilized](#Skills-Utilized)
 * [System Diagram](#System-Diagram)
@@ -75,8 +74,13 @@ More in depth information can be found [here](Documentation/Software_Design.md)
 
 
 # Known Issues
-* The filter is not perfectly centered around the 1.5 v value with perfect size to fit the whole adc sampling range there is a calibration feature to be added which would give feedback and tell you to adjust the volume potentiometer on the input guitar. This does not matter on the output as it is renormalized when the data enters the MCU but limits the maximum amount of information to be taken within the ADC
+* The filter is not perfectly centered around the 1.5 v value with perfect size to fit the whole adc sampling range there is a calibration feature to be added which would give feedback and tell you to adjust the volume potentiometer on the input guitar. This does not matter on the output as it is renormalized when the data enters the MCU but limits the maximum amount of information to be taken within the ADC.
+
 # Conclusion
+A very interesting project overall as it required careful consideration of grounding, crosstalk, and mixed circuitry. It really put into perspective how much of a difference outside sources of noise and their harmonics can damage analog signals From my testing phase where I made multiple breakout boards for each major set of components and utilized lots of jumpers which in essence acted as a large amount of antennas and picked up large amounts of external noise to when the PCB was fabricated and those were replaced by traces in the lengths of the scale of mm. Also since this was my first system that used a 4-layer board I believe I was able to really lock down and eliminiate the EMI from the trace lengths and messy wiring that was avoided.
+
+Also since I had used a very powerful processor it very easily allowed for any of the effects to be layered and for each effect to be used as requested by the user, This would theoretically lead to another MCU chosen in the future which would have less power and would become cheaper to manufacture but this would be for another time and because this is a personal project for me and a few friends this edit is to be omitted.
+
 
 # Acknowledgements
 * [Embedded Media Processing](https://www.analog.com/media/en/dsp-documentation/embedded-media-processing/embedded-media-processing-chapter5.pdf) --> from analog circuit for basic design tips for both software and hardware.
