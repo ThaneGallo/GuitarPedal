@@ -9,9 +9,11 @@
 ## Part Selection
 
 ### Op-Amp
- I chose the [OPAx134](https://www.ti.com/lit/ds/symlink/opa134.pdf) Op-amp as it boasts very small noise characterestics around the audio range that would be able to be heard by the human ear (0Hz - 20kHz) 
- 
- Although it is a little pricier than the other alternatives I believe it is worth the cost as it gives us a good starting signal into our ADC
+ I chose the [OPAx134](https://www.ti.com/lit/ds/symlink/opa134.pdf) 
+
+ This was chosen due to the following characteristics:
+ * Very small noise characterestics around the audio range that would be able to be heard by the human ear (0Hz - 20kHz) 
+ *  Although it is a little pricier than the other alternatives I believe it is worth the cost as it gives us a good starting signal into our ADC
 
 
 ### ADC
