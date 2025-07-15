@@ -9,7 +9,9 @@
 ## Part Selection
 
 ### Op-Amp
-
+ I chose the [OPAx134](https://www.ti.com/lit/ds/symlink/opa134.pdf) Op-amp as it boasts very small noise characterestics around the audio range that would be able to be heard by the human ear (0Hz - 20kHz) 
+ 
+ Although it is a little pricier than the other alternatives I believe it is worth the cost as it gives us a good starting signal into our ADC
 
 
 ### ADC
@@ -34,17 +36,15 @@ This was chosen due to the following characteristics:
 * Used in industry and very user friendly
 
 ### DAC
+The chosen DAC was [WM8524CGEDT/R](https://www.digikey.com/en/products/detail/cirrus-logic-inc/WM8524CGEDT-R/5036730)
 
-### Power Distribution
-The current network contains the following:
-* Li-Po 7.4V 26000mAh battery 
-* BMS for balancing voltages and charging
-* Buck converter 7.4V --> 3.3
-* Charge pump for dual +- 5V supply
+This was chosen because
 
-#### Charging Circuit 
+* I2S Compatable
+* Similar sample rate to ADC
+* Signle power supply (3.3V)
+* No preprocesssing is needed for the output signal aside from a passive filter
 
-#### Where does the power go?
 
 # Development 
 My plan was to develop each sub-circuit one at a time then integrate. This led to the development of the following sub circuits in this order:
@@ -52,7 +52,7 @@ My plan was to develop each sub-circuit one at a time then integrate. This led t
 * Op-amp
 * ADC breakout board
 * DAC breakout board
-* Battery charger / power management system
+* MCU
 
 The decision to make breakout boards was made so I would theoretically be able to modularize these components and possibly use them for future projects while also testing the efectiveness of the PCBA design. This did however slow down development as each breakout took approximetely 1 week to fabricate.
 
@@ -70,15 +70,19 @@ Once this was completed I began the breakout board for the DAC which proceeded s
 
 ![DAC Layout](../Documentation/Images/DAC_Layout.png)
 
-The battery charger was able to be done simultaneously as I could purchase the desired battery, discharge it with a resistor and set up the battery balancer and charging system.
 
-The MCU was not be added to the PCB until the very last step as I have the ability to use a development board for my MCU and want to avoid any possible hiccups until later in development
+The MCU was not be added to the PCB until the very last step as I have the ability to use a development board for my MCU and want to avoid any possible hiccups until later in development.
 
 Finally the system was integrated together and each part was combined in a single PCBA and can be seen below:
 
 
 # Roadbumps
 
+## Too many "antennas"
+I quickly realized that as I create more breakout boards each individual jumper wire would carry the signals and distort them although this was mainly a concern for the analog electronics for signal integrety the grounding system that was set up was less than ideal as it was spread over several long jumpers and not a dedicated plane. 
+
 # Conclusion / Future Design Changes
+
+Possibly downgrade the MCU as it is relatively a higher power option to something cheaper to procure and produce.
 
 PCM1740E/2K appears to be much better but would cost me nearly 500x time amount of the other option
