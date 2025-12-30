@@ -1,0 +1,38 @@
+# Analog Design!
+
+## Passive component considerations
+After lots of reading through xx(forgot name of book) it was made clear to me the depth that goes into manufacuring and how much variance can actually exist within passive components. 
+
+My specific use case however has a constant temperature, need for a low tolerance for better filter characteristics, low distortion and thermal noise.
+
+### Capacitors
+Amongst all of the large variety of choices I have I was drawn to two different types. Since audio frequencies exist around 20Hz-20kHz I would need a beefy capacitor for the low end to attenuate the thermal noise. My choices are as followes
+
+Polypropylene Film 
+
+Polystyrene Film
+
+honestly both extremely solid choices although it seems Polystyrene is a more "premium" choice for this as it generally seems to have better characteristics aside from the cost.
+
+For now I will be using Polypropylene capacitors and after the next iteration will decide if I want to upgrade for crispier quality or not.
+
+
+### Resistors
+#### Potentiometer
+Single turn pot only as multi turns are prone to 
+
+
+### Inductors (or lack thereof)
+Evil
+
+## Power Sources
+Since I am using an op amp that has a signal that swings negative I would need a negative and a positive source. This will lead to me needing some sort of switching converter as I want to maximi
+
+## Filtering 
+
+
+
+
+## Amplification
+
+
